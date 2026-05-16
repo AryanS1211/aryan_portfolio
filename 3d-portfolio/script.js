@@ -136,8 +136,37 @@
   const gasPlanet = buildPlanet(28, -58, -115, 17, 0xc8a45a, 0xd4b87a);
   scene.add(gasPlanet);
 
+  /* ── "Hi!" speech bubble sprite ── */
+  function makeHiSprite() {
+    const cv = document.createElement('canvas');
+    cv.width = 160; cv.height = 80;
+    const ctx = cv.getContext('2d');
+    // Bubble
+    ctx.fillStyle = 'rgba(255,255,255,0.96)';
+    ctx.strokeStyle = '#e94560';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(16, 4); ctx.lineTo(130, 4);
+    ctx.quadraticCurveTo(142, 4, 142, 16);
+    ctx.lineTo(142, 50); ctx.quadraticCurveTo(142, 62, 130, 62);
+    ctx.lineTo(50, 62); ctx.lineTo(36, 76); ctx.lineTo(42, 62);
+    ctx.lineTo(16, 62); ctx.quadraticCurveTo(4, 62, 4, 50);
+    ctx.lineTo(4, 16); ctx.quadraticCurveTo(4, 4, 16, 4);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    // Text
+    ctx.fillStyle = '#e94560';
+    ctx.font = 'bold 26px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Hi! 👋', 73, 42);
+    const tex = new THREE.CanvasTexture(cv);
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+    sprite.scale.set(1.2, 0.6, 1);
+    return sprite;
+  }
+
   /* ── Build spaceship — realistic multi-section design ── */
-  function buildShip(scale) {
+  function buildShip(scale, withPilot = false) {
     const g = new THREE.Group();
 
     const hullMat    = new THREE.MeshBasicMaterial({ color: 0x7799cc, transparent: true, opacity: 0.92 });
@@ -243,6 +272,48 @@
       g.add(pl);
     });
 
+    // ── PILOT (only on main ship) ──
+    if (withPilot) {
+      const skinMat = new THREE.MeshBasicMaterial({ color: 0xffcc99 });
+      const hairMat = new THREE.MeshBasicMaterial({ color: 0x1a0a00 });
+      const suitMat = new THREE.MeshBasicMaterial({ color: 0x334466 });
+
+      // Helmet (outer)
+      const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 10),
+        new THREE.MeshBasicMaterial({ color: 0x8aacff, transparent: true, opacity: 0.55 }));
+      helmet.position.set(0, 0.34, 1.05);
+      g.add(helmet);
+
+      // Head (inside helmet)
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.10, 8, 8), skinMat);
+      head.position.set(0, 0.34, 1.05);
+      g.add(head);
+
+      // Hair
+      const hair = new THREE.Mesh(new THREE.SphereGeometry(0.105, 8, 8), hairMat);
+      hair.position.set(0, 0.40, 1.04);
+      hair.scale.set(1, 0.45, 1);
+      g.add(hair);
+
+      // Body/suit
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.18, 8), suitMat);
+      body.position.set(0, 0.20, 1.05);
+      g.add(body);
+
+      // Waving arm
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.14, 0.04), skinMat);
+      arm.position.set(0.14, 0.35, 1.05);
+      arm.rotation.z = -0.6;
+      g.add(arm);
+      g.userData.arm = arm;
+
+      // "Hi!" speech bubble
+      const bubble = makeHiSprite();
+      bubble.position.set(0.55, 0.80, 1.3);
+      g.add(bubble);
+      g.userData.bubble = bubble;
+    }
+
     g.scale.set(scale, scale, scale);
     return g;
   }
@@ -291,8 +362,8 @@
     };
   }
 
-  /* ── Main ship ── */
-  const mainShip = buildShip(2.4);
+  /* ── Main ship (with pilot) ── */
+  const mainShip = buildShip(2.4, true);
   scene.add(mainShip);
   const mainTrail = createTrail(0xff9944, 55);
 
@@ -414,6 +485,8 @@
     // Main ship
     placeShip(mainShip, 20, 0.22, 0.0, 0, t);
     mainTrail.update(mainShip.userData.engine);
+    // Pilot waving arm
+    if (mainShip.userData.arm) mainShip.userData.arm.rotation.z = -0.6 + Math.sin(t * 3.5) * 0.5;
     if (mainShip.userData.engine) {
       const pulse = 0.70 + Math.sin(t * 14) * 0.30;
       const haloScale = 0.8 + Math.sin(t * 10) * 0.25;
