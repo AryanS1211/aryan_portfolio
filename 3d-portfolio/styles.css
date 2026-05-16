@@ -44,14 +44,17 @@ ul { list-style: none; }
   align-items: center;
   justify-content: space-between;
   padding: 18px 48px;
-  background: rgba(8,12,20,0);
-  backdrop-filter: blur(0px);
+  background: rgba(8,12,20,0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   transition: background 0.4s, backdrop-filter 0.4s, padding 0.4s;
 }
 
 #navbar.scrolled {
-  background: rgba(8,12,20,0.88);
-  backdrop-filter: blur(18px);
+  background: rgba(8,12,20,0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   padding: 12px 48px;
   border-bottom: 1px solid var(--card-border);
 }
