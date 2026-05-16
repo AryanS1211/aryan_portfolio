@@ -64,6 +64,16 @@ ul { list-style: none; }
   letter-spacing: 0.04em;
 }
 
+.nav-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top center;
+  border: 2px solid var(--accent);
+  display: block;
+}
+
 .nav-links {
   display: flex;
   gap: 36px;
