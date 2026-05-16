@@ -23,13 +23,23 @@
   const stars = new THREE.Points(starGeo, starMat);
   scene.add(stars);
 
+  /* ── Scene lighting (makes planets look 3D/real) ── */
+  const ambientLight = new THREE.AmbientLight(0x223355, 0.5);
+  scene.add(ambientLight);
+  const sunLight = new THREE.DirectionalLight(0xfff5dd, 2.0);
+  sunLight.position.set(45, 25, 70);
+  scene.add(sunLight);
+  const rimLight = new THREE.DirectionalLight(0x334477, 0.4);
+  rimLight.position.set(-40, -10, -50);
+  scene.add(rimLight);
+
   /* ── Planets ── */
   function buildEarth(x, y, z, radius) {
     const g = new THREE.Group();
 
-    // Ocean base
+    // Ocean base — Phong for realistic shading
     const oceanGeo = new THREE.SphereGeometry(radius, 32, 32);
-    const oceanMat = new THREE.MeshBasicMaterial({ color: 0x1a6faa });
+    const oceanMat = new THREE.MeshPhongMaterial({ color: 0x1a6faa, shininess: 80, specular: 0x224466 });
     g.add(new THREE.Mesh(oceanGeo, oceanMat));
 
     // Atmosphere glow (slightly larger, transparent blue)
@@ -46,7 +56,7 @@
       { lat:  0.2, lon: -2.2, sx: 0.26, sy: 0.14, sz: 0.10 },
       { lat:  1.1, lon:  2.0, sx: 0.20, sy: 0.10, sz: 0.10 },
     ];
-    const cMat = new THREE.MeshBasicMaterial({ color: 0x2d8a4e });
+    const cMat = new THREE.MeshPhongMaterial({ color: 0x2d8a4e, shininess: 8 });
     continentData.forEach(({ lat, lon, sx, sy }) => {
       const cGeo = new THREE.SphereGeometry(radius * 0.32, 8, 8);
       const c = new THREE.Mesh(cGeo, cMat);
@@ -61,7 +71,7 @@
     });
 
     // Polar ice caps
-    const iceMat = new THREE.MeshBasicMaterial({ color: 0xddeeff, transparent: true, opacity: 0.85 });
+    const iceMat = new THREE.MeshPhongMaterial({ color: 0xeef5ff, shininess: 60, transparent: true, opacity: 0.88 });
     [-1, 1].forEach(sign => {
       const iceGeo = new THREE.SphereGeometry(radius * 0.28, 8, 8);
       const ice = new THREE.Mesh(iceGeo, iceMat);
@@ -82,7 +92,7 @@
   function buildPlanet(x, y, z, radius, color, ringColor) {
     const g = new THREE.Group();
     const geo = new THREE.SphereGeometry(radius, 24, 24);
-    const mat = new THREE.MeshBasicMaterial({ color });
+    const mat = new THREE.MeshPhongMaterial({ color, shininess: 22, specular: 0x222222 });
     g.add(new THREE.Mesh(geo, mat));
 
     // Subtle surface variation
@@ -242,6 +252,44 @@
   fleet.forEach(s => scene.add(s.mesh));
   const fleetTrails = fleet.map(() => createTrail(0xff7733, 30));
 
+  /* ── Moon + Moon→Earth trajectory ship ── */
+  const moonMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(3.8, 20, 20),
+    new THREE.MeshPhongMaterial({ color: 0xb2b2c8, shininess: 6 })
+  );
+  moonMesh.position.set(-46, 28, -83);
+  scene.add(moonMesh);
+
+  // Add craters on moon
+  [{ x:  1.5, y:  2.5, z:  3.2 }, { x: -2.0, y:  1.0, z:  3.1 }, { x:  0.5, y: -2.2, z:  3.2 }].forEach(p => {
+    const c = new THREE.Mesh(
+      new THREE.SphereGeometry(0.55, 8, 8),
+      new THREE.MeshPhongMaterial({ color: 0x8888a0, shininess: 3 })
+    );
+    c.position.set(p.x, p.y, p.z);
+    c.scale.set(1, 1, 0.25);
+    moonMesh.add(c);
+  });
+
+  // Bezier control points
+  const moonP  = new THREE.Vector3(-46, 28, -83);
+  const earthP = new THREE.Vector3(-62, 38, -95);
+  const arcP   = new THREE.Vector3(  2, 68, -76); // high arc midpoint
+
+  function bezierVec3(u, p0, p1, p2) {
+    const v = 1 - u;
+    return new THREE.Vector3(
+      v*v*p0.x + 2*v*u*p1.x + u*u*p2.x,
+      v*v*p0.y + 2*v*u*p1.y + u*u*p2.y,
+      v*v*p0.z + 2*v*u*p1.z + u*u*p2.z
+    );
+  }
+
+  const pathShip  = buildShip(1.1);
+  scene.add(pathShip);
+  const pathTrail = createTrail(0xffaa44, 40);
+  const PATH_CYCLE = 4.5; // t-units per full cycle (~10 s at t+=0.007 @60fps)
+
   /* ── Orbit helper ── */
   function orbitPos(angle, R, tilt) {
     return new THREE.Vector3(
@@ -289,6 +337,26 @@
     earth.rotation.y     = t * 0.04;
     redPlanet.rotation.y = t * 0.06;
     gasPlanet.rotation.y = t * 0.025;
+    moonMesh.rotation.y  = t * 0.015;
+
+    // Moon→Earth path ship (quadratic bezier trajectory)
+    const pathFrac = (t % PATH_CYCLE) / PATH_CYCLE; // 0→1 per cycle
+    if (pathFrac < 0.58) {
+      const u = pathFrac / 0.58;
+      const pos  = bezierVec3(u, moonP, arcP, earthP);
+      const look = bezierVec3(Math.min(u + 0.025, 1), moonP, arcP, earthP);
+      pathShip.position.copy(pos);
+      pathShip.lookAt(look);
+      pathShip.visible = true;
+      pathTrail.update(pathShip.userData.engine);
+      if (pathShip.userData.engine) {
+        pathShip.userData.engine.material.opacity = 0.7 + Math.sin(t * 14) * 0.3;
+      }
+    } else if (pathFrac < 0.72) {
+      pathShip.visible = true; // pause at Earth
+    } else {
+      pathShip.visible = false; // reset invisibly
+    }
 
     // Main ship
     placeShip(mainShip, 20, 0.22, 0.0, 0, t);
