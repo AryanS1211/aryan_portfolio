@@ -136,65 +136,112 @@
   const gasPlanet = buildPlanet(28, -58, -115, 17, 0xc8a45a, 0xd4b87a);
   scene.add(gasPlanet);
 
-  /* ── Build spaceship (no static trail — world-space trail used instead) ── */
+  /* ── Build spaceship — realistic multi-section design ── */
   function buildShip(scale) {
     const g = new THREE.Group();
 
-    const hullMat   = new THREE.MeshBasicMaterial({ color: 0x8aacff, transparent: true, opacity: 0.88 });
-    const wingMat   = new THREE.MeshBasicMaterial({ color: 0x7b5ea7, transparent: true, opacity: 0.82, side: THREE.DoubleSide });
-    const noseMat   = new THREE.MeshBasicMaterial({ color: 0xe94560, transparent: true, opacity: 0.95 });
-    const wireMat   = new THREE.MeshBasicMaterial({ color: 0xbbddff, wireframe: true, transparent: true, opacity: 0.25 });
-    const engineMat = new THREE.MeshBasicMaterial({ color: 0xff8833, transparent: true, opacity: 0.95 });
+    const hullMat    = new THREE.MeshBasicMaterial({ color: 0x7799cc, transparent: true, opacity: 0.92 });
+    const hull2Mat   = new THREE.MeshBasicMaterial({ color: 0x5577aa, transparent: true, opacity: 0.90 });
+    const wingMat    = new THREE.MeshBasicMaterial({ color: 0x6688bb, transparent: true, opacity: 0.88, side: THREE.DoubleSide });
+    const accentMat  = new THREE.MeshBasicMaterial({ color: 0xe94560, transparent: true, opacity: 0.90, side: THREE.DoubleSide });
+    const darkMat    = new THREE.MeshBasicMaterial({ color: 0x223355, transparent: true, opacity: 0.92 });
+    const noseMat    = new THREE.MeshBasicMaterial({ color: 0xe94560, transparent: true, opacity: 0.95 });
+    const cockpitMat = new THREE.MeshBasicMaterial({ color: 0x88ccff, transparent: true, opacity: 0.55 });
+    const panelMat   = new THREE.MeshBasicMaterial({ color: 0x334466, transparent: true, opacity: 0.65 });
 
-    // Body
-    const bodyGeo = new THREE.CylinderGeometry(0.28, 0.58, 3.2, 8);
-    const body = new THREE.Mesh(bodyGeo, hullMat);
-    body.rotation.x = Math.PI / 2;
-    g.add(body);
+    // ── FUSELAGE (3 sections) ──
+    const fwdGeo = new THREE.CylinderGeometry(0.16, 0.36, 2.2, 12);
+    const fwd = new THREE.Mesh(fwdGeo, hullMat);
+    fwd.rotation.x = Math.PI / 2; fwd.position.z = 1.3;
+    g.add(fwd);
 
-    const bodyWire = new THREE.Mesh(bodyGeo, wireMat);
-    bodyWire.rotation.x = Math.PI / 2;
-    g.add(bodyWire);
+    const midGeo = new THREE.CylinderGeometry(0.36, 0.40, 1.0, 12);
+    const mid = new THREE.Mesh(midGeo, hull2Mat);
+    mid.rotation.x = Math.PI / 2;
+    g.add(mid);
 
-    // Nose
-    const noseGeo = new THREE.ConeGeometry(0.28, 2.0, 8);
+    const aftGeo = new THREE.CylinderGeometry(0.40, 0.52, 1.2, 12);
+    const aft = new THREE.Mesh(aftGeo, hull2Mat);
+    aft.rotation.x = Math.PI / 2; aft.position.z = -1.1;
+    g.add(aft);
+
+    const tailGeo = new THREE.CylinderGeometry(0.52, 0.48, 0.5, 12);
+    const tail = new THREE.Mesh(tailGeo, darkMat);
+    tail.rotation.x = Math.PI / 2; tail.position.z = -1.85;
+    g.add(tail);
+
+    // ── NOSE CONE ──
+    const noseGeo = new THREE.ConeGeometry(0.16, 2.8, 12);
     const nose = new THREE.Mesh(noseGeo, noseMat);
-    nose.rotation.x = -Math.PI / 2;
-    nose.position.z = 2.8;
+    nose.rotation.x = -Math.PI / 2; nose.position.z = 3.8;
     g.add(nose);
 
-    // Wings
-    const wGeo = new THREE.BoxGeometry(2.6, 0.07, 1.5);
-    const wL = new THREE.Mesh(wGeo, wingMat);
-    wL.position.set(-1.55, 0, -0.4);
-    wL.rotation.y = 0.22;
-    g.add(wL);
+    // ── COCKPIT CANOPY ──
+    const canopyGeo = new THREE.SphereGeometry(0.20, 10, 8, 0, Math.PI * 2, 0, Math.PI * 0.52);
+    const canopy = new THREE.Mesh(canopyGeo, cockpitMat);
+    canopy.position.set(0, 0.36, 1.1);
+    canopy.scale.set(1.4, 1.0, 2.0);
+    g.add(canopy);
 
-    const wR = new THREE.Mesh(wGeo, wingMat);
-    wR.position.set(1.55, 0, -0.4);
-    wR.rotation.y = -0.22;
-    g.add(wR);
+    // ── DELTA WINGS ──
+    const mkWing = (xSign) => {
+      const wGeo = new THREE.BoxGeometry(2.9, 0.05, 2.0);
+      const w = new THREE.Mesh(wGeo, wingMat);
+      w.position.set(xSign * 1.65, -0.04, -0.4);
+      w.rotation.y = xSign * 0.30;
+      w.rotation.z = xSign * -0.05;
+      g.add(w);
+      // Leading edge red stripe
+      const leGeo = new THREE.BoxGeometry(2.7, 0.055, 0.14);
+      const le = new THREE.Mesh(leGeo, accentMat);
+      le.position.set(xSign * 1.60, -0.04, 0.5);
+      le.rotation.y = xSign * 0.30;
+      g.add(le);
+    };
+    mkWing(-1); mkWing(1);
 
-    // Fin
-    const finGeo = new THREE.BoxGeometry(0.07, 0.9, 1.2);
+    // ── VERTICAL FIN ──
+    const finGeo = new THREE.BoxGeometry(0.055, 1.15, 1.5);
     const fin = new THREE.Mesh(finGeo, wingMat);
-    fin.position.set(0, 0.55, -0.6);
+    fin.position.set(0, 0.72, -0.7);
     g.add(fin);
 
-    // Engine core
-    const eGeo = new THREE.SphereGeometry(0.44, 8, 6);
-    const engine = new THREE.Mesh(eGeo, engineMat);
-    engine.position.z = -1.75;
-    g.add(engine);
-    g.userData.engine = engine;
+    // ── TWIN ENGINE PODS ──
+    [-0.40, 0.40].forEach((xOff, idx) => {
+      const podGeo = new THREE.CylinderGeometry(0.11, 0.14, 1.5, 8);
+      const pod = new THREE.Mesh(podGeo, darkMat);
+      pod.rotation.x = Math.PI / 2; pod.position.set(xOff, -0.30, -1.55);
+      g.add(pod);
 
-    // Engine outer glow halo
-    const haloGeo = new THREE.SphereGeometry(0.7, 8, 6);
-    const haloMat = new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.25 });
-    const halo = new THREE.Mesh(haloGeo, haloMat);
-    halo.position.z = -1.75;
-    g.add(halo);
-    g.userData.halo = halo;
+      const nozzleGeo = new THREE.ConeGeometry(0.14, 0.38, 8);
+      const nozzle = new THREE.Mesh(nozzleGeo, darkMat);
+      nozzle.rotation.x = Math.PI / 2; nozzle.position.set(xOff, -0.30, -2.42);
+      g.add(nozzle);
+
+      const eMat = new THREE.MeshBasicMaterial({ color: 0xff8833, transparent: true, opacity: 0.95 });
+      const engine = new THREE.Mesh(new THREE.SphereGeometry(0.17, 8, 6), eMat);
+      engine.position.set(xOff, -0.30, -2.58);
+      g.add(engine);
+
+      const haloMat = new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.22 });
+      const halo = new THREE.Mesh(new THREE.SphereGeometry(0.30, 8, 6), haloMat);
+      halo.position.set(xOff, -0.30, -2.58);
+      g.add(halo);
+
+      if (idx === 0) { g.userData.engine = engine; g.userData.halo = halo; }
+      else           { g.userData.engineR = engine; g.userData.haloR = halo; }
+    });
+
+    // ── HULL DETAIL LINES ──
+    const spine = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.07, 3.6), panelMat);
+    spine.position.set(0, 0.38, 0.3);
+    g.add(spine);
+
+    [-0.30, 0.30].forEach(x => {
+      const pl = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.035, 2.8), panelMat);
+      pl.position.set(x, 0.20, 0.4);
+      g.add(pl);
+    });
 
     g.scale.set(scale, scale, scale);
     return g;
@@ -369,11 +416,11 @@
     mainTrail.update(mainShip.userData.engine);
     if (mainShip.userData.engine) {
       const pulse = 0.70 + Math.sin(t * 14) * 0.30;
-      mainShip.userData.engine.material.opacity = pulse;
-      if (mainShip.userData.halo) {
-        mainShip.userData.halo.material.opacity = pulse * 0.38;
-        mainShip.userData.halo.scale.setScalar(0.8 + Math.sin(t * 10) * 0.25);
-      }
+      const haloScale = 0.8 + Math.sin(t * 10) * 0.25;
+      mainShip.userData.engine.material.opacity  = pulse;
+      mainShip.userData.engineR.material.opacity = pulse;
+      if (mainShip.userData.halo)  { mainShip.userData.halo.material.opacity  = pulse * 0.38; mainShip.userData.halo.scale.setScalar(haloScale); }
+      if (mainShip.userData.haloR) { mainShip.userData.haloR.material.opacity = pulse * 0.38; mainShip.userData.haloR.scale.setScalar(haloScale); }
     }
 
     // Fleet
@@ -382,8 +429,10 @@
       fleetTrails[i].update(s.mesh.userData.engine);
       if (s.mesh.userData.engine) {
         const p = 0.65 + Math.sin(t * 10 + s.phase) * 0.28;
-        s.mesh.userData.engine.material.opacity = p;
-        if (s.mesh.userData.halo) s.mesh.userData.halo.material.opacity = p * 0.35;
+        s.mesh.userData.engine.material.opacity  = p;
+        if (s.mesh.userData.engineR) s.mesh.userData.engineR.material.opacity = p;
+        if (s.mesh.userData.halo)    s.mesh.userData.halo.material.opacity    = p * 0.35;
+        if (s.mesh.userData.haloR)   s.mesh.userData.haloR.material.opacity   = p * 0.35;
       }
     });
 
