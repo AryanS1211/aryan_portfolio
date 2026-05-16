@@ -1,24 +1,437 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3D Portfolio</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div id="container">
-      <div id="scene">
-        <div id="cube">
-          <div class="face front">Summary</div>
-          <div class="face back">Experience</div>
-          <div class="face left">Projects</div>
-          <div class="face right">Education</div>
-          <div class="face top">Skills</div>
-          <div class="face bottom">Contact</div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aryan Sawant — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────────────────────── -->
+<nav id="navbar">
+  <div class="nav-logo">AS</div>
+  <ul class="nav-links">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#hackathon">Competition</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#education">Education</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="nav-hamburger" id="hamburger" aria-label="Menu">&#9776;</button>
+</nav>
+
+<!-- ── HERO ────────────────────────────────────────────────────────── -->
+<section id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <p class="hero-tag">Data Engineer &amp; Analyst</p>
+    <h1 class="hero-name">Aryan<br><span>Sawant</span></h1>
+    <p class="hero-sub">Building data pipelines, dashboards, and ML systems that solve real problems.</p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn btn-primary">View Work</a>
+      <a href="#contact" class="btn btn-outline">Get In Touch</a>
+    </div>
+  </div>
+  <div class="hero-scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ── ABOUT ───────────────────────────────────────────────────────── -->
+<section id="about" class="section">
+  <div class="container">
+    <div class="section-label">01 / About</div>
+    <h2 class="section-title">My Journey</h2>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>I am a Computer Engineering student and data-focused developer who has built practical experience across analytics, dashboards, machine learning, and data engineering.</p>
+        <p>My journey began with a Data Analyst Internship at <strong>DRDO</strong>, where I worked on aircraft tire defect detection, waste forecasting dashboards, and AI-driven research for defense operations.</p>
+        <p>I later contributed as a Data Analyst at <strong>KUIK</strong>, building delivery performance pipelines, PostgreSQL optimizations, coverage dashboards, and automation tools for real business problems.</p>
+        <p>I also secured <strong>2nd runner-up</strong> in the Tantraudgama 2025 Insight Innovators Challenge — winning ₹10,000.</p>
+      </div>
+      <div class="about-card-wrap reveal">
+        <div class="about-3d-card" id="about-card">
+          <div class="card-inner">
+            <div class="card-glow"></div>
+            <div class="card-stat"><span class="stat-num">2+</span><span class="stat-label">Years of Experience</span></div>
+            <div class="card-stat"><span class="stat-num">50k+</span><span class="stat-label">Records Analyzed</span></div>
+            <div class="card-stat"><span class="stat-num">93%</span><span class="stat-label">ML Model Accuracy</span></div>
+            <div class="card-stat"><span class="stat-num">30%</span><span class="stat-label">SLA Improvement</span></div>
+          </div>
         </div>
       </div>
     </div>
-    <script src="script.js"></script>
-  </body>
+  </div>
+</section>
+
+<!-- ── EXPERIENCE ──────────────────────────────────────────────────── -->
+<section id="experience" class="section section-dark">
+  <div class="container">
+    <div class="section-label">02 / Experience</div>
+    <h2 class="section-title">Professional Experience</h2>
+    <div class="timeline">
+
+      <div class="timeline-item reveal" data-side="right">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card tilt-card">
+          <div class="tc-header">
+            <div class="tc-logo-wrap">
+              <img src="project images/thekuik_logo.jfif" alt="KUIK" class="tc-logo" />
+            </div>
+            <div>
+              <h3>Data Analyst</h3>
+              <p class="tc-org">KUIK</p>
+              <p class="tc-date">Aug 2025 – Mar 2026</p>
+            </div>
+          </div>
+          <ul>
+            <li>Developed data pipelines enhancing delivery performance for Amazon &amp; Myntra.</li>
+            <li>Created dashboards improving visibility into delivery delays — <strong>30% SLA improvement</strong>.</li>
+            <li>Optimized PostgreSQL queries boosting data reliability by <strong>10%</strong>.</li>
+            <li>Integrated pincode coverage dashboards for serviceable delivery areas.</li>
+            <li>Built a Python tool to calculate the farthest serviceable delivery point, eliminating manual effort.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item reveal" data-side="left">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card tilt-card">
+          <div class="tc-header">
+            <div class="tc-logo-wrap">
+              <img src="project images/drdo.png" alt="DRDO" class="tc-logo" />
+            </div>
+            <div>
+              <h3>Data Analyst Intern</h3>
+              <p class="tc-org">DRDO — Indian Air Force</p>
+              <p class="tc-date">Jan 2024 – Sep 2024</p>
+            </div>
+          </div>
+          <ul>
+            <li>Designed aircraft tire defect detection system with <strong>93% accuracy</strong>.</li>
+            <li>Built Power BI dashboards for waste category forecasting, reducing defense costs.</li>
+            <li>Published a research paper on AI-driven waste management in a high-impact journal.</li>
+            <li>Improved analytical accuracy by <strong>9%</strong> using data normalization techniques.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── PROJECTS ────────────────────────────────────────────────────── -->
+<section id="projects" class="section">
+  <div class="container">
+    <div class="section-label">03 / Projects</div>
+    <h2 class="section-title">Featured Work</h2>
+    <div class="project-grid">
+
+      <!-- Rsend -->
+      <div class="project-card tilt-card reveal">
+        <div class="project-img-wrap proj-illustration">
+          <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" class="proj-svg">
+            <defs>
+              <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1a1d3a"/>
+                <stop offset="100%" stop-color="#2d1f4e"/>
+              </linearGradient>
+              <linearGradient id="g1a" x1="0%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%" stop-color="#7b5ea7" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#e94560" stop-opacity="0.9"/>
+              </linearGradient>
+            </defs>
+            <rect width="400" height="200" fill="url(#g1)"/>
+            <!-- grid lines -->
+            <line x1="0" y1="160" x2="400" y2="160" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <line x1="0" y1="120" x2="400" y2="120" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <line x1="0" y1="80" x2="400" y2="80" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <!-- bar chart -->
+            <rect x="30" y="100" width="28" height="60" rx="4" fill="url(#g1a)" opacity="0.8"/>
+            <rect x="70" y="70"  width="28" height="90" rx="4" fill="url(#g1a)"/>
+            <rect x="110" y="115" width="28" height="45" rx="4" fill="url(#g1a)" opacity="0.7"/>
+            <rect x="150" y="55"  width="28" height="105" rx="4" fill="url(#g1a)"/>
+            <rect x="190" y="85"  width="28" height="75" rx="4" fill="url(#g1a)" opacity="0.85"/>
+            <!-- sidebar panel -->
+            <rect x="248" y="20" width="132" height="160" rx="10" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+            <!-- paper plane icon -->
+            <text x="268" y="52" font-size="22" fill="#7b5ea7">✈</text>
+            <!-- email rows -->
+            <rect x="262" y="65" width="100" height="7" rx="3" fill="rgba(255,255,255,0.15)"/>
+            <rect x="262" y="78" width="74" height="5" rx="3" fill="rgba(255,255,255,0.08)"/>
+            <rect x="262" y="95" width="100" height="7" rx="3" fill="rgba(255,255,255,0.12)"/>
+            <rect x="262" y="108" width="60" height="5" rx="3" fill="rgba(255,255,255,0.07)"/>
+            <rect x="262" y="124" width="100" height="7" rx="3" fill="rgba(255,255,255,0.1)"/>
+            <!-- send button -->
+            <rect x="262" y="148" width="100" height="20" rx="10" fill="#7b5ea7" opacity="0.9"/>
+            <text x="312" y="162" font-size="9" fill="white" text-anchor="middle" font-family="Arial">Send Report</text>
+          </svg>
+          <div class="project-overlay">
+            <a href="https://project-fdt4h.vercel.app" target="_blank" class="overlay-btn">View Live</a>
+          </div>
+        </div>
+        <div class="project-body">
+          <h3>Rsend — Email Delivery System</h3>
+          <div class="project-tags">
+            <span>React</span><span>TypeScript</span><span>Supabase</span><span>EmailJS</span><span>Vercel</span>
+          </div>
+          <ul>
+            <li>Browser-based EDS — connect Google Sheets/CSV, generate AI-assisted charts, send emails automatically.</li>
+            <li>AI body expansion, threshold alerts, multi-sheet support, and visual chart capture via snipping tool.</li>
+            <li>Full stack: React 18 + Vite + Tailwind CSS, PostgreSQL (Supabase), Cloudinary file hosting.</li>
+          </ul>
+          <a href="https://project-fdt4h.vercel.app" target="_blank" class="project-link">View Live →</a>
+        </div>
+      </div>
+
+      <!-- Customer Delivery Analytics -->
+      <div class="project-card tilt-card reveal">
+        <div class="project-img-wrap proj-illustration">
+          <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" class="proj-svg">
+            <defs>
+              <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0d1f3c"/>
+                <stop offset="100%" stop-color="#0a2a4a"/>
+              </linearGradient>
+              <linearGradient id="g2a" x1="0%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%" stop-color="#0077b6"/>
+                <stop offset="100%" stop-color="#00c6fb"/>
+              </linearGradient>
+            </defs>
+            <rect width="400" height="200" fill="url(#g2)"/>
+            <!-- grid -->
+            <line x1="0" y1="160" x2="400" y2="160" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <line x1="0" y1="120" x2="400" y2="120" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <line x1="0" y1="80"  x2="400" y2="80"  stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <!-- line chart path -->
+            <polyline points="20,150 70,110 120,130 170,75 220,95 270,60 320,80 380,50"
+              fill="none" stroke="#00c6fb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- area fill -->
+            <polygon points="20,150 70,110 120,130 170,75 220,95 270,60 320,80 380,50 380,165 20,165"
+              fill="url(#g2a)" opacity="0.12"/>
+            <!-- dots on line -->
+            <circle cx="170" cy="75" r="4" fill="#00c6fb"/>
+            <circle cx="270" cy="60" r="4" fill="#00c6fb"/>
+            <circle cx="380" cy="50" r="4" fill="#00c6fb"/>
+            <!-- KPI cards top-right -->
+            <rect x="240" y="15" width="72" height="38" rx="8" fill="rgba(0,198,251,0.12)" stroke="rgba(0,198,251,0.25)" stroke-width="1"/>
+            <text x="276" y="31" font-size="7" fill="rgba(255,255,255,0.55)" text-anchor="middle" font-family="Arial">On-Time Rate</text>
+            <text x="276" y="45" font-size="13" fill="#00c6fb" text-anchor="middle" font-family="Arial" font-weight="bold">87%</text>
+            <rect x="320" y="15" width="72" height="38" rx="8" fill="rgba(0,198,251,0.12)" stroke="rgba(0,198,251,0.25)" stroke-width="1"/>
+            <text x="356" y="31" font-size="7" fill="rgba(255,255,255,0.55)" text-anchor="middle" font-family="Arial">SLA Breach</text>
+            <text x="356" y="45" font-size="13" fill="#e94560" text-anchor="middle" font-family="Arial" font-weight="bold">-30%</text>
+            <!-- delivery truck icon area -->
+            <rect x="20" y="15" width="100" height="38" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <text x="70" y="38" font-size="20" text-anchor="middle" fill="rgba(255,255,255,0.7)">🚚</text>
+          </svg>
+          <div class="project-overlay">
+            <a href="https://aryans1211-customer-anal-kuik-delivery-analysisdashboard-zouprb.streamlit.app/" target="_blank" class="overlay-btn">View Live</a>
+          </div>
+        </div>
+        <div class="project-body">
+          <h3>Customer Delivery Performance Analytics</h3>
+          <div class="project-tags">
+            <span>Python</span><span>SQL</span><span>Power BI</span><span>Streamlit</span>
+          </div>
+          <ul>
+            <li>Analyzed 50,000+ delivery records to identify patterns and optimize performance.</li>
+            <li>Designed dashboards tracking on-time delivery rates and hub efficiency.</li>
+            <li>Reduced last-mile SLA breaches using data-driven solutions.</li>
+          </ul>
+          <a href="https://aryans1211-customer-anal-kuik-delivery-analysisdashboard-zouprb.streamlit.app/" target="_blank" class="project-link">View Project →</a>
+        </div>
+      </div>
+
+      <!-- Network Chat Room -->
+      <div class="project-card tilt-card reveal">
+        <div class="project-img-wrap proj-illustration">
+          <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" class="proj-svg">
+            <defs>
+              <linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0f2027"/>
+                <stop offset="100%" stop-color="#1a3a2a"/>
+              </linearGradient>
+            </defs>
+            <rect width="400" height="200" fill="url(#g3)"/>
+            <!-- network lines -->
+            <line x1="200" y1="100" x2="80"  y2="50"  stroke="rgba(0,200,150,0.25)" stroke-width="1.5"/>
+            <line x1="200" y1="100" x2="320" y2="50"  stroke="rgba(0,200,150,0.25)" stroke-width="1.5"/>
+            <line x1="200" y1="100" x2="60"  y2="155" stroke="rgba(0,200,150,0.25)" stroke-width="1.5"/>
+            <line x1="200" y1="100" x2="340" y2="155" stroke="rgba(0,200,150,0.25)" stroke-width="1.5"/>
+            <line x1="200" y1="100" x2="200" y2="25"  stroke="rgba(0,200,150,0.2)"  stroke-width="1.5"/>
+            <line x1="80"  y1="50"  x2="60"  y2="155" stroke="rgba(0,200,150,0.12)" stroke-width="1"/>
+            <line x1="320" y1="50"  x2="340" y2="155" stroke="rgba(0,200,150,0.12)" stroke-width="1"/>
+            <!-- chat bubble left -->
+            <rect x="30" y="112" width="80" height="28" rx="10" fill="rgba(0,200,150,0.18)" stroke="rgba(0,200,150,0.35)" stroke-width="1"/>
+            <rect x="38" y="120" width="50" height="5" rx="2" fill="rgba(255,255,255,0.4)"/>
+            <rect x="38" y="129" width="34" height="4" rx="2" fill="rgba(255,255,255,0.2)"/>
+            <polygon points="40,140 30,148 50,140" fill="rgba(0,200,150,0.18)"/>
+            <!-- chat bubble right -->
+            <rect x="290" y="112" width="80" height="28" rx="10" fill="rgba(233,69,96,0.18)" stroke="rgba(233,69,96,0.35)" stroke-width="1"/>
+            <rect x="298" y="120" width="50" height="5" rx="2" fill="rgba(255,255,255,0.4)"/>
+            <rect x="298" y="129" width="36" height="4" rx="2" fill="rgba(255,255,255,0.2)"/>
+            <polygon points="360,140 370,148 350,140" fill="rgba(233,69,96,0.18)"/>
+            <!-- center node -->
+            <circle cx="200" cy="100" r="18" fill="rgba(0,200,150,0.15)" stroke="#00c896" stroke-width="2"/>
+            <text x="200" y="106" font-size="14" text-anchor="middle" fill="#00c896">💬</text>
+            <!-- peripheral nodes -->
+            <circle cx="80"  cy="50"  r="10" fill="rgba(0,200,150,0.2)" stroke="#00c896" stroke-width="1.5"/>
+            <circle cx="320" cy="50"  r="10" fill="rgba(0,200,150,0.2)" stroke="#00c896" stroke-width="1.5"/>
+            <circle cx="60"  cy="155" r="10" fill="rgba(0,200,150,0.2)" stroke="#00c896" stroke-width="1.5"/>
+            <circle cx="340" cy="155" r="10" fill="rgba(0,200,150,0.2)" stroke="#00c896" stroke-width="1.5"/>
+            <circle cx="200" cy="25"  r="8"  fill="rgba(0,200,150,0.2)" stroke="#00c896" stroke-width="1.5"/>
+            <!-- LAN label -->
+            <rect x="158" y="165" width="84" height="22" rx="11" fill="rgba(0,200,150,0.12)" stroke="rgba(0,200,150,0.3)" stroke-width="1"/>
+            <text x="200" y="180" font-size="9" text-anchor="middle" fill="#00c896" font-family="Arial" font-weight="bold">LAN NETWORK</text>
+          </svg>
+          <div class="project-overlay">
+            <a href="https://github.com/AryanS1211/Network_Chat_Room" target="_blank" class="overlay-btn">View on GitHub</a>
+          </div>
+        </div>
+        <div class="project-body">
+          <h3>Network Chat Room</h3>
+          <div class="project-tags">
+            <span>Python</span><span>Sockets</span><span>LAN</span>
+          </div>
+          <ul>
+            <li>Developed a LAN chat application for real-time group messaging.</li>
+            <li>Implemented robust communication protocols for seamless interaction.</li>
+            <li>Designed an intuitive UI for efficient multi-user communication.</li>
+          </ul>
+          <a href="https://github.com/AryanS1211/Network_Chat_Room" target="_blank" class="project-link">View Project →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── HACKATHON ────────────────────────────────────────────────────── -->
+<section id="hackathon" class="section section-dark">
+  <div class="container">
+    <div class="section-label">04 / Competition</div>
+    <h2 class="section-title">Hackathon Winner</h2>
+    <div class="hackathon-layout">
+      <div class="hackathon-img-wrap reveal">
+        <img src="project images/hackthon.jpeg" alt="Tantraudgama 2025" />
+        <div class="hackathon-badge">🏆 Hackathon Winner</div>
+      </div>
+      <div class="hackathon-details reveal">
+        <h3>Tantraudgama 2025 — Insight Innovators Challenge</h3>
+        <p class="hackathon-desc">A proud milestone from my competitive data journey — where practical analytics and predictive modelling came together in a high-pressure challenge.</p>
+        <div class="hackathon-stats">
+          <div class="h-stat"><span class="h-stat-val">₹10,000</span><span class="h-stat-label">Cash Prize</span></div>
+          <div class="h-stat"><span class="h-stat-val">🏆</span><span class="h-stat-label">Winner</span></div>
+          <div class="h-stat"><span class="h-stat-val">2025</span><span class="h-stat-label">Year</span></div>
+        </div>
+        <ul class="hackathon-list">
+          <li>Won the Tantraudgama 2025 Insight Innovators Challenge as Hackathon Winner.</li>
+          <li>Competed in data analytics and predictive modelling with a practical, data-driven solution.</li>
+          <li>Awarded a cash prize of <strong>₹10,000</strong> for the winning performance.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SKILLS ──────────────────────────────────────────────────────── -->
+<section id="skills" class="section section-dark">
+  <div class="container">
+    <div class="section-label">05 / Skills</div>
+    <h2 class="section-title">Tech Stack</h2>
+    <div class="skills-grid" id="skills-grid">
+      <div class="skill-chip reveal"><img src="https://cdn.simpleicons.org/python" alt="Python" /><span>Python</span></div>
+      <div class="skill-chip reveal"><img src="https://cdn.simpleicons.org/pandas/150458" alt="Pandas" /><span>Pandas</span></div>
+      <div class="skill-chip reveal"><img src="https://cdn.simpleicons.org/numpy/013243" alt="NumPy" /><span>NumPy</span></div>
+      <div class="skill-chip reveal"><img src="https://img.icons8.com/color/96/sql.png" alt="SQL" /><span>SQL</span></div>
+      <div class="skill-chip reveal"><img src="https://cdn.simpleicons.org/postgresql" alt="PostgreSQL" /><span>PostgreSQL</span></div>
+      <div class="skill-chip reveal"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" alt="Java" /><span>Java</span></div>
+      <div class="skill-chip reveal"><img src="https://cdn.simpleicons.org/scikitlearn" alt="ML" /><span>Machine Learning</span></div>
+      <div class="skill-chip reveal"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytorch/pytorch-original.svg" alt="Deep Learning" /><span>Deep Learning</span></div>
+      <div class="skill-chip reveal"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azure/azure-original.svg" alt="Azure" /><span>Azure Data Factory</span></div>
+      <div class="skill-chip reveal"><img src="https://cdn.simpleicons.org/supabase" alt="Supabase" /><span>Supabase</span></div>
+      <div class="skill-chip reveal"><img src="https://img.icons8.com/color/96/power-bi-2021.png" alt="Power BI" /><span>Power BI</span></div>
+      <div class="skill-chip reveal"><img src="https://img.icons8.com/color/96/microsoft-excel-2019--v1.png" alt="Excel" /><span>Excel</span></div>
+      <div class="skill-chip reveal"><img src="https://cdn.simpleicons.org/apachesuperset/20A6C9" alt="Superset" /><span>Apache Superset</span></div>
+      <div class="skill-chip reveal"><img src="https://cdn.simpleicons.org/looker/4285F4" alt="Looker" /><span>Looker Studio</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── EDUCATION ───────────────────────────────────────────────────── -->
+<section id="education" class="section">
+  <div class="container">
+    <div class="section-label">06 / Education</div>
+    <h2 class="section-title">Education</h2>
+    <div class="edu-list">
+      <div class="edu-item tilt-card reveal">
+        <div class="edu-icon">🎓</div>
+        <div class="edu-body">
+          <h3>Bachelor of Computer Engineering</h3>
+          <p class="edu-org">Pune University</p>
+          <p class="edu-meta">2022 – 2026 &nbsp;·&nbsp; <strong>7.8 CGPA</strong></p>
+        </div>
+      </div>
+      <div class="edu-item tilt-card reveal">
+        <div class="edu-icon">📚</div>
+        <div class="edu-body">
+          <h3>Class XII — Science</h3>
+          <p class="edu-org">Nano Krims Junior College</p>
+          <p class="edu-meta">2022 &nbsp;·&nbsp; <strong>71%</strong></p>
+        </div>
+      </div>
+      <div class="edu-item tilt-card reveal">
+        <div class="edu-icon">📖</div>
+        <div class="edu-body">
+          <h3>Class X</h3>
+          <p class="edu-org">Mahaveer English Medium School</p>
+          <p class="edu-meta">2020 &nbsp;·&nbsp; <strong>81%</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTACT ─────────────────────────────────────────────────────── -->
+<section id="contact" class="section section-dark">
+  <div class="container contact-container">
+    <div class="section-label">07 / Contact</div>
+    <h2 class="section-title">Let's Connect</h2>
+    <p class="contact-sub">Open to opportunities, collaborations, and interesting problems.</p>
+    <div class="contact-links reveal">
+      <a href="mailto:aryansawant1144@gmail.com" class="contact-pill">
+        <img src="https://img.icons8.com/color/48/gmail-new.png" alt="Email" />
+        aryansawant1144@gmail.com
+      </a>
+      <a href="tel:+919604475651" class="contact-pill">
+        <img src="https://img.icons8.com/color/48/phone.png" alt="Phone" />
+        +91 9604475651
+      </a>
+      <a href="https://www.linkedin.com/in/aryan-sawant/" target="_blank" class="contact-pill">
+        <img src="https://img.icons8.com/color/48/linkedin.png" alt="LinkedIn" />
+        LinkedIn
+      </a>
+      <a href="https://github.com/AryanS1211" target="_blank" class="contact-pill">
+        <img src="https://cdn.simpleicons.org/github/FFFFFF" alt="GitHub" />
+        AryanS1211
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Aryan Sawant. Built with Three.js &amp; ❤️</p>
+</footer>
+
+<!-- ── SCRIPTS ─────────────────────────────────────────────────────── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="script.js"></script>
+</body>
 </html>
