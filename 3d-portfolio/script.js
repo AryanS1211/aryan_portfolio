@@ -108,16 +108,16 @@
     return g;
   }
 
-  // Earth — large, behind and to the left
-  const earth = buildEarth(-38, 14, -80, 14);
+  // Earth — top-left corner, far back
+  const earth = buildEarth(-62, 38, -95, 11);
   scene.add(earth);
 
-  // Rocky red planet (Mars-like) — far right
-  const redPlanet = buildPlanet(55, -10, -70, 7, 0xb84a2f);
+  // Rocky red planet — far right, mid-height
+  const redPlanet = buildPlanet(72, -6, -75, 6.5, 0xb84a2f);
   scene.add(redPlanet);
 
-  // Gas giant with rings — deep background
-  const gasPlanet = buildPlanet(-10, -28, -110, 18, 0xc8a45a, 0xd4b87a);
+  // Gas giant with rings — bottom area, deep background
+  const gasPlanet = buildPlanet(28, -58, -115, 17, 0xc8a45a, 0xd4b87a);
   scene.add(gasPlanet);
 
   /* ── Build a spaceship from primitives ── */
