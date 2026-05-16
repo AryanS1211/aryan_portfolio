@@ -23,6 +23,103 @@
   const stars = new THREE.Points(starGeo, starMat);
   scene.add(stars);
 
+  /* ── Planets ── */
+  function buildEarth(x, y, z, radius) {
+    const g = new THREE.Group();
+
+    // Ocean base
+    const oceanGeo = new THREE.SphereGeometry(radius, 32, 32);
+    const oceanMat = new THREE.MeshBasicMaterial({ color: 0x1a6faa });
+    g.add(new THREE.Mesh(oceanGeo, oceanMat));
+
+    // Atmosphere glow (slightly larger, transparent blue)
+    const atmGeo = new THREE.SphereGeometry(radius * 1.06, 32, 32);
+    const atmMat = new THREE.MeshBasicMaterial({ color: 0x4488cc, transparent: true, opacity: 0.18, side: THREE.BackSide });
+    g.add(new THREE.Mesh(atmGeo, atmMat));
+
+    // Continents — green patches scattered on surface
+    const continentData = [
+      { lat:  0.5, lon:  0.3, sx: 0.38, sy: 0.18, sz: 0.10 },
+      { lat: -0.4, lon:  1.4, sx: 0.30, sy: 0.14, sz: 0.10 },
+      { lat:  0.9, lon: -1.0, sx: 0.22, sy: 0.12, sz: 0.10 },
+      { lat: -0.7, lon:  2.8, sx: 0.42, sy: 0.20, sz: 0.10 },
+      { lat:  0.2, lon: -2.2, sx: 0.26, sy: 0.14, sz: 0.10 },
+      { lat:  1.1, lon:  2.0, sx: 0.20, sy: 0.10, sz: 0.10 },
+    ];
+    const cMat = new THREE.MeshBasicMaterial({ color: 0x2d8a4e });
+    continentData.forEach(({ lat, lon, sx, sy }) => {
+      const cGeo = new THREE.SphereGeometry(radius * 0.32, 8, 8);
+      const c = new THREE.Mesh(cGeo, cMat);
+      c.scale.set(sx, sy, 0.18);
+      c.position.set(
+        Math.cos(lat) * Math.cos(lon) * radius,
+        Math.sin(lat) * radius,
+        Math.cos(lat) * Math.sin(lon) * radius
+      );
+      c.lookAt(0, 0, 0);
+      g.add(c);
+    });
+
+    // Polar ice caps
+    const iceMat = new THREE.MeshBasicMaterial({ color: 0xddeeff, transparent: true, opacity: 0.85 });
+    [-1, 1].forEach(sign => {
+      const iceGeo = new THREE.SphereGeometry(radius * 0.28, 8, 8);
+      const ice = new THREE.Mesh(iceGeo, iceMat);
+      ice.scale.set(1, 0.22, 1);
+      ice.position.y = sign * radius * 0.92;
+      g.add(ice);
+    });
+
+    // Thin wireframe grid (like globe lines)
+    const gridGeo = new THREE.SphereGeometry(radius * 1.002, 16, 16);
+    const gridMat = new THREE.MeshBasicMaterial({ color: 0x66aadd, wireframe: true, transparent: true, opacity: 0.07 });
+    g.add(new THREE.Mesh(gridGeo, gridMat));
+
+    g.position.set(x, y, z);
+    return g;
+  }
+
+  function buildPlanet(x, y, z, radius, color, ringColor) {
+    const g = new THREE.Group();
+    const geo = new THREE.SphereGeometry(radius, 24, 24);
+    const mat = new THREE.MeshBasicMaterial({ color });
+    g.add(new THREE.Mesh(geo, mat));
+
+    // Subtle surface variation
+    const overlayGeo = new THREE.SphereGeometry(radius * 1.001, 12, 12);
+    const overlayMat = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.04 });
+    g.add(new THREE.Mesh(overlayGeo, overlayMat));
+
+    // Atmosphere
+    const atmGeo = new THREE.SphereGeometry(radius * 1.08, 24, 24);
+    const atmMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.12, side: THREE.BackSide });
+    g.add(new THREE.Mesh(atmGeo, atmMat));
+
+    // Optional rings (Saturn-like)
+    if (ringColor) {
+      const rGeo = new THREE.TorusGeometry(radius * 1.85, radius * 0.28, 4, 64);
+      const rMat = new THREE.MeshBasicMaterial({ color: ringColor, transparent: true, opacity: 0.45, side: THREE.DoubleSide });
+      const ring = new THREE.Mesh(rGeo, rMat);
+      ring.rotation.x = Math.PI * 0.42;
+      g.add(ring);
+    }
+
+    g.position.set(x, y, z);
+    return g;
+  }
+
+  // Earth — large, behind and to the left
+  const earth = buildEarth(-38, 14, -80, 14);
+  scene.add(earth);
+
+  // Rocky red planet (Mars-like) — far right
+  const redPlanet = buildPlanet(55, -10, -70, 7, 0xb84a2f);
+  scene.add(redPlanet);
+
+  // Gas giant with rings — deep background
+  const gasPlanet = buildPlanet(-10, -28, -110, 18, 0xc8a45a, 0xd4b87a);
+  scene.add(gasPlanet);
+
   /* ── Build a spaceship from primitives ── */
   function buildShip(scale) {
     const g = new THREE.Group();
@@ -151,6 +248,11 @@
     // Stars slowly drift with mouse
     stars.rotation.y = t * 0.03 + mSmooth.x * 0.05;
     stars.rotation.x = t * 0.012 + mSmooth.y * 0.025;
+
+    // Planet rotation
+    earth.rotation.y    = t * 0.04;
+    redPlanet.rotation.y = t * 0.06;
+    gasPlanet.rotation.y = t * 0.025;
 
     // Main ship orbit
     placeShip(mainShip, 20, 0.20, 0.0, 0, t);
