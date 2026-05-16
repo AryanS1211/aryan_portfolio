@@ -120,7 +120,7 @@
   const gasPlanet = buildPlanet(28, -58, -115, 17, 0xc8a45a, 0xd4b87a);
   scene.add(gasPlanet);
 
-  /* ── Build a spaceship from primitives ── */
+  /* ── Build spaceship (no static trail — world-space trail used instead) ── */
   function buildShip(scale) {
     const g = new THREE.Group();
 
@@ -128,9 +128,9 @@
     const wingMat   = new THREE.MeshBasicMaterial({ color: 0x7b5ea7, transparent: true, opacity: 0.82, side: THREE.DoubleSide });
     const noseMat   = new THREE.MeshBasicMaterial({ color: 0xe94560, transparent: true, opacity: 0.95 });
     const wireMat   = new THREE.MeshBasicMaterial({ color: 0xbbddff, wireframe: true, transparent: true, opacity: 0.25 });
-    const engineMat = new THREE.MeshBasicMaterial({ color: 0xff7744, transparent: true, opacity: 0.95 });
+    const engineMat = new THREE.MeshBasicMaterial({ color: 0xff8833, transparent: true, opacity: 0.95 });
 
-    // ── Body (cylinder aligned to +Z) ──
+    // Body
     const bodyGeo = new THREE.CylinderGeometry(0.28, 0.58, 3.2, 8);
     const body = new THREE.Mesh(bodyGeo, hullMat);
     body.rotation.x = Math.PI / 2;
@@ -140,16 +140,15 @@
     bodyWire.rotation.x = Math.PI / 2;
     g.add(bodyWire);
 
-    // ── Nose cone — tip points +Z ──
+    // Nose
     const noseGeo = new THREE.ConeGeometry(0.28, 2.0, 8);
     const nose = new THREE.Mesh(noseGeo, noseMat);
     nose.rotation.x = -Math.PI / 2;
     nose.position.z = 2.8;
     g.add(nose);
 
-    // ── Wings (flat swept-back boxes) ──
+    // Wings
     const wGeo = new THREE.BoxGeometry(2.6, 0.07, 1.5);
-
     const wL = new THREE.Mesh(wGeo, wingMat);
     wL.position.set(-1.55, 0, -0.4);
     wL.rotation.y = 0.22;
@@ -160,49 +159,88 @@
     wR.rotation.y = -0.22;
     g.add(wR);
 
-    // ── Fin (vertical stabiliser) ──
+    // Fin
     const finGeo = new THREE.BoxGeometry(0.07, 0.9, 1.2);
     const fin = new THREE.Mesh(finGeo, wingMat);
     fin.position.set(0, 0.55, -0.6);
     g.add(fin);
 
-    // ── Engine glow orb ──
-    const eGeo = new THREE.SphereGeometry(0.34, 8, 6);
+    // Engine core
+    const eGeo = new THREE.SphereGeometry(0.44, 8, 6);
     const engine = new THREE.Mesh(eGeo, engineMat);
     engine.position.z = -1.75;
     g.add(engine);
     g.userData.engine = engine;
 
-    // ── Engine trail ──
-    const trailColors = [0xff9944, 0xff7722, 0xff5511, 0xff3300, 0xcc2200, 0x991100, 0x550000];
-    for (let i = 0; i < 7; i++) {
-      const r = Math.max(0.02, 0.3 - i * 0.04);
-      const tGeo = new THREE.SphereGeometry(r, 5, 5);
-      const tMat = new THREE.MeshBasicMaterial({
-        color: trailColors[i] || 0x330000,
-        transparent: true,
-        opacity: Math.max(0, 0.72 - i * 0.1)
-      });
-      const trail = new THREE.Mesh(tGeo, tMat);
-      trail.position.z = -2.15 - i * 0.44;
-      g.add(trail);
-    }
+    // Engine outer glow halo
+    const haloGeo = new THREE.SphereGeometry(0.7, 8, 6);
+    const haloMat = new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.25 });
+    const halo = new THREE.Mesh(haloGeo, haloMat);
+    halo.position.z = -1.75;
+    g.add(halo);
+    g.userData.halo = halo;
 
     g.scale.set(scale, scale, scale);
     return g;
   }
 
+  /* ── World-space exhaust trail ── */
+  function createTrail(color, maxLen) {
+    const pos  = new Float32Array(maxLen * 3);
+    const geo  = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setDrawRange(0, 0);
+    const pts = new THREE.Points(geo,
+      new THREE.PointsMaterial({ color, size: 0.38, transparent: true, opacity: 0.70, sizeAttenuation: true }));
+    scene.add(pts);
+
+    // Sparse fading tail (every other point, dimmer)
+    const half = Math.floor(maxLen / 2);
+    const pos2 = new Float32Array(half * 3);
+    const geo2 = new THREE.BufferGeometry();
+    geo2.setAttribute('position', new THREE.BufferAttribute(pos2, 3));
+    geo2.setDrawRange(0, 0);
+    const pts2 = new THREE.Points(geo2,
+      new THREE.PointsMaterial({ color, size: 0.18, transparent: true, opacity: 0.28, sizeAttenuation: true }));
+    scene.add(pts2);
+
+    const history = [];
+    const tmp = new THREE.Vector3();
+    return {
+      update(engineMesh) {
+        engineMesh.getWorldPosition(tmp);
+        history.unshift({ x: tmp.x, y: tmp.y, z: tmp.z });
+        if (history.length > maxLen) history.pop();
+        const len = history.length;
+        for (let i = 0; i < len; i++) {
+          pos[i * 3] = history[i].x; pos[i * 3 + 1] = history[i].y; pos[i * 3 + 2] = history[i].z;
+        }
+        geo.setDrawRange(0, len);
+        geo.attributes.position.needsUpdate = true;
+        const h2 = Math.min(Math.floor(len / 2), half);
+        for (let i = 0; i < h2; i++) {
+          const idx = Math.min(i * 2 + 5, len - 1);
+          pos2[i * 3] = history[idx].x; pos2[i * 3 + 1] = history[idx].y; pos2[i * 3 + 2] = history[idx].z;
+        }
+        geo2.setDrawRange(0, h2);
+        geo2.attributes.position.needsUpdate = true;
+      }
+    };
+  }
+
   /* ── Main ship ── */
   const mainShip = buildShip(2.4);
   scene.add(mainShip);
+  const mainTrail = createTrail(0xff9944, 55);
 
   /* ── Background fleet ── */
   const fleet = [
-    { mesh: buildShip(0.9), R: 36, speed: 0.10, tilt: 0.5,  phase: 1.1 },
+    { mesh: buildShip(0.9),  R: 36, speed: 0.10, tilt:  0.5, phase: 1.1 },
     { mesh: buildShip(0.65), R: 28, speed: 0.14, tilt: -0.7, phase: 3.7 },
-    { mesh: buildShip(0.5),  R: 44, speed: 0.08, tilt: 0.9,  phase: 5.3 },
+    { mesh: buildShip(0.5),  R: 44, speed: 0.08, tilt:  0.9, phase: 5.3 },
   ];
   fleet.forEach(s => scene.add(s.mesh));
+  const fleetTrails = fleet.map(() => createTrail(0xff7733, 30));
 
   /* ── Orbit helper ── */
   function orbitPos(angle, R, tilt) {
@@ -240,36 +278,41 @@
   let t = 0;
   function animate() {
     requestAnimationFrame(animate);
-    t += 0.006;
+    t += 0.007;
 
     mSmooth.x += (mouse.x * 4 - mSmooth.x) * 0.05;
     mSmooth.y += (mouse.y * 2 - mSmooth.y) * 0.05;
 
-    // Stars slowly drift with mouse
     stars.rotation.y = t * 0.03 + mSmooth.x * 0.05;
     stars.rotation.x = t * 0.012 + mSmooth.y * 0.025;
 
-    // Planet rotation
-    earth.rotation.y    = t * 0.04;
+    earth.rotation.y     = t * 0.04;
     redPlanet.rotation.y = t * 0.06;
     gasPlanet.rotation.y = t * 0.025;
 
-    // Main ship orbit
-    placeShip(mainShip, 20, 0.20, 0.0, 0, t);
-    // Pulse engine glow
+    // Main ship
+    placeShip(mainShip, 20, 0.22, 0.0, 0, t);
+    mainTrail.update(mainShip.userData.engine);
     if (mainShip.userData.engine) {
-      mainShip.userData.engine.material.opacity = 0.72 + Math.sin(t * 9) * 0.22;
+      const pulse = 0.70 + Math.sin(t * 14) * 0.30;
+      mainShip.userData.engine.material.opacity = pulse;
+      if (mainShip.userData.halo) {
+        mainShip.userData.halo.material.opacity = pulse * 0.38;
+        mainShip.userData.halo.scale.setScalar(0.8 + Math.sin(t * 10) * 0.25);
+      }
     }
 
     // Fleet
-    fleet.forEach(s => {
+    fleet.forEach((s, i) => {
       placeShip(s.mesh, s.R, s.speed, s.tilt, s.phase, t);
+      fleetTrails[i].update(s.mesh.userData.engine);
       if (s.mesh.userData.engine) {
-        s.mesh.userData.engine.material.opacity = 0.65 + Math.sin(t * 7 + s.phase) * 0.2;
+        const p = 0.65 + Math.sin(t * 10 + s.phase) * 0.28;
+        s.mesh.userData.engine.material.opacity = p;
+        if (s.mesh.userData.halo) s.mesh.userData.halo.material.opacity = p * 0.35;
       }
     });
 
-    // Camera parallax
     camera.position.x += (mSmooth.x * 2   - camera.position.x) * 0.04;
     camera.position.y += (mSmooth.y * 1.5  - camera.position.y) * 0.04;
 
