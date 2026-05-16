@@ -107,11 +107,17 @@
 
     // Optional rings (Saturn-like)
     if (ringColor) {
-      const rGeo = new THREE.TorusGeometry(radius * 1.85, radius * 0.28, 4, 64);
-      const rMat = new THREE.MeshBasicMaterial({ color: ringColor, transparent: true, opacity: 0.45, side: THREE.DoubleSide });
+      const rGeo = new THREE.RingGeometry(radius * 1.35, radius * 2.25, 80);
+      const rMat = new THREE.MeshBasicMaterial({ color: ringColor, transparent: true, opacity: 0.52, side: THREE.DoubleSide });
       const ring = new THREE.Mesh(rGeo, rMat);
-      ring.rotation.x = Math.PI * 0.42;
+      ring.rotation.x = Math.PI * 0.22;
       g.add(ring);
+      // Inner darker band
+      const r2Geo = new THREE.RingGeometry(radius * 1.55, radius * 1.75, 80);
+      const r2Mat = new THREE.MeshBasicMaterial({ color: 0x8a6a2a, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
+      const ring2 = new THREE.Mesh(r2Geo, r2Mat);
+      ring2.rotation.x = Math.PI * 0.22;
+      g.add(ring2);
     }
 
     g.position.set(x, y, z);
