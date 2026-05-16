@@ -6,114 +6,173 @@
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 300);
   camera.position.z = 50;
 
-  /* ── Particle field ── */
-  const COUNT = 3000;
+  /* ── Star field ── */
+  const COUNT = 3500;
   const positions = new Float32Array(COUNT * 3);
-  const sizes = new Float32Array(COUNT);
-
   for (let i = 0; i < COUNT; i++) {
-    positions[i * 3]     = (Math.random() - 0.5) * 160;
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 120;
-    sizes[i] = Math.random() * 1.5 + 0.3;
+    positions[i * 3]     = (Math.random() - 0.5) * 200;
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 130;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 160;
+  }
+  const starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const starMat = new THREE.PointsMaterial({ color: 0x9988cc, size: 0.32, transparent: true, opacity: 0.65 });
+  const stars = new THREE.Points(starGeo, starMat);
+  scene.add(stars);
+
+  /* ── Build a spaceship from primitives ── */
+  function buildShip(scale) {
+    const g = new THREE.Group();
+
+    const hullMat   = new THREE.MeshBasicMaterial({ color: 0x8aacff, transparent: true, opacity: 0.88 });
+    const wingMat   = new THREE.MeshBasicMaterial({ color: 0x7b5ea7, transparent: true, opacity: 0.82, side: THREE.DoubleSide });
+    const noseMat   = new THREE.MeshBasicMaterial({ color: 0xe94560, transparent: true, opacity: 0.95 });
+    const wireMat   = new THREE.MeshBasicMaterial({ color: 0xbbddff, wireframe: true, transparent: true, opacity: 0.25 });
+    const engineMat = new THREE.MeshBasicMaterial({ color: 0xff7744, transparent: true, opacity: 0.95 });
+
+    // ── Body (cylinder aligned to +Z) ──
+    const bodyGeo = new THREE.CylinderGeometry(0.28, 0.58, 3.2, 8);
+    const body = new THREE.Mesh(bodyGeo, hullMat);
+    body.rotation.x = Math.PI / 2;
+    g.add(body);
+
+    const bodyWire = new THREE.Mesh(bodyGeo, wireMat);
+    bodyWire.rotation.x = Math.PI / 2;
+    g.add(bodyWire);
+
+    // ── Nose cone — tip points +Z ──
+    const noseGeo = new THREE.ConeGeometry(0.28, 2.0, 8);
+    const nose = new THREE.Mesh(noseGeo, noseMat);
+    nose.rotation.x = -Math.PI / 2;
+    nose.position.z = 2.8;
+    g.add(nose);
+
+    // ── Wings (flat swept-back boxes) ──
+    const wGeo = new THREE.BoxGeometry(2.6, 0.07, 1.5);
+
+    const wL = new THREE.Mesh(wGeo, wingMat);
+    wL.position.set(-1.55, 0, -0.4);
+    wL.rotation.y = 0.22;
+    g.add(wL);
+
+    const wR = new THREE.Mesh(wGeo, wingMat);
+    wR.position.set(1.55, 0, -0.4);
+    wR.rotation.y = -0.22;
+    g.add(wR);
+
+    // ── Fin (vertical stabiliser) ──
+    const finGeo = new THREE.BoxGeometry(0.07, 0.9, 1.2);
+    const fin = new THREE.Mesh(finGeo, wingMat);
+    fin.position.set(0, 0.55, -0.6);
+    g.add(fin);
+
+    // ── Engine glow orb ──
+    const eGeo = new THREE.SphereGeometry(0.34, 8, 6);
+    const engine = new THREE.Mesh(eGeo, engineMat);
+    engine.position.z = -1.75;
+    g.add(engine);
+    g.userData.engine = engine;
+
+    // ── Engine trail ──
+    const trailColors = [0xff9944, 0xff7722, 0xff5511, 0xff3300, 0xcc2200, 0x991100, 0x550000];
+    for (let i = 0; i < 7; i++) {
+      const r = Math.max(0.02, 0.3 - i * 0.04);
+      const tGeo = new THREE.SphereGeometry(r, 5, 5);
+      const tMat = new THREE.MeshBasicMaterial({
+        color: trailColors[i] || 0x330000,
+        transparent: true,
+        opacity: Math.max(0, 0.72 - i * 0.1)
+      });
+      const trail = new THREE.Mesh(tGeo, tMat);
+      trail.position.z = -2.15 - i * 0.44;
+      g.add(trail);
+    }
+
+    g.scale.set(scale, scale, scale);
+    return g;
   }
 
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+  /* ── Main ship ── */
+  const mainShip = buildShip(2.4);
+  scene.add(mainShip);
 
-  const mat = new THREE.PointsMaterial({
-    color: 0x7b5ea7,
-    size: 0.35,
-    transparent: true,
-    opacity: 0.6,
-    sizeAttenuation: true,
-  });
-
-  const particles = new THREE.Points(geo, mat);
-  scene.add(particles);
-
-  /* ── Floating wireframe rings ── */
-  const rings = [];
-  const ringData = [
-    { r: 14, tube: 0.06, color: 0xe94560, x: -20, y: 10, z: -10 },
-    { r: 9,  tube: 0.04, color: 0x7b5ea7, x: 22,  y: -8, z: -20 },
-    { r: 6,  tube: 0.04, color: 0xe94560, x: 5,   y: 16, z: -30 },
+  /* ── Background fleet ── */
+  const fleet = [
+    { mesh: buildShip(0.9), R: 36, speed: 0.10, tilt: 0.5,  phase: 1.1 },
+    { mesh: buildShip(0.65), R: 28, speed: 0.14, tilt: -0.7, phase: 3.7 },
+    { mesh: buildShip(0.5),  R: 44, speed: 0.08, tilt: 0.9,  phase: 5.3 },
   ];
+  fleet.forEach(s => scene.add(s.mesh));
 
-  ringData.forEach(d => {
-    const g = new THREE.TorusGeometry(d.r, d.tube, 16, 80);
-    const m = new THREE.MeshBasicMaterial({ color: d.color, wireframe: true, transparent: true, opacity: 0.25 });
-    const mesh = new THREE.Mesh(g, m);
-    mesh.position.set(d.x, d.y, d.z);
-    scene.add(mesh);
-    rings.push(mesh);
-  });
+  /* ── Orbit helper ── */
+  function orbitPos(angle, R, tilt) {
+    return new THREE.Vector3(
+      Math.cos(angle) * R,
+      Math.sin(angle * 0.55) * R * 0.32 + Math.sin(tilt + angle * 0.28) * 5,
+      Math.sin(angle) * R * 0.55 - 8
+    );
+  }
 
-  /* ── Floating icosahedra ── */
-  const floaters = [];
-  const floaterPositions = [
-    [-25, -12, -15], [28, 14, -25], [-10, 20, -35], [18, -18, -10],
-  ];
-
-  floaterPositions.forEach(([x, y, z]) => {
-    const g = new THREE.IcosahedronGeometry(1.4, 0);
-    const m = new THREE.MeshBasicMaterial({ color: 0x7b5ea7, wireframe: true, transparent: true, opacity: 0.2 });
-    const mesh = new THREE.Mesh(g, m);
-    mesh.position.set(x, y, z);
-    scene.add(mesh);
-    floaters.push(mesh);
-  });
+  function placeShip(ship, R, speed, tilt, phase, t) {
+    const a = t * speed + phase;
+    const pos  = orbitPos(a, R, tilt);
+    const look = orbitPos(a + 0.06, R, tilt);
+    ship.position.copy(pos);
+    ship.lookAt(look);
+    ship.rotateZ(Math.sin(a * 1.8) * 0.22);  // banking
+  }
 
   /* ── Mouse parallax ── */
-  const mouse = { x: 0, y: 0 };
-  const target = { x: 0, y: 0 };
-
+  const mouse  = { x: 0, y: 0 };
+  const mSmooth = { x: 0, y: 0 };
   document.addEventListener('mousemove', e => {
-    mouse.x = (e.clientX / window.innerWidth - 0.5) * 2;
+    mouse.x =  (e.clientX / window.innerWidth  - 0.5) * 2;
     mouse.y = -(e.clientY / window.innerHeight - 0.5) * 2;
   });
 
-  /* ── Resize ── */
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  /* ── Animation loop ── */
-  let clock = 0;
-
+  /* ── Render loop ── */
+  let t = 0;
   function animate() {
     requestAnimationFrame(animate);
-    clock += 0.006;
+    t += 0.006;
 
-    target.x += (mouse.x * 4 - target.x) * 0.05;
-    target.y += (mouse.y * 2 - target.y) * 0.05;
+    mSmooth.x += (mouse.x * 4 - mSmooth.x) * 0.05;
+    mSmooth.y += (mouse.y * 2 - mSmooth.y) * 0.05;
 
-    particles.rotation.y = clock * 0.04 + target.x * 0.06;
-    particles.rotation.x = clock * 0.02 + target.y * 0.03;
+    // Stars slowly drift with mouse
+    stars.rotation.y = t * 0.03 + mSmooth.x * 0.05;
+    stars.rotation.x = t * 0.012 + mSmooth.y * 0.025;
 
-    rings.forEach((r, i) => {
-      r.rotation.x = clock * (0.18 + i * 0.07);
-      r.rotation.y = clock * (0.12 + i * 0.05);
+    // Main ship orbit
+    placeShip(mainShip, 20, 0.20, 0.0, 0, t);
+    // Pulse engine glow
+    if (mainShip.userData.engine) {
+      mainShip.userData.engine.material.opacity = 0.72 + Math.sin(t * 9) * 0.22;
+    }
+
+    // Fleet
+    fleet.forEach(s => {
+      placeShip(s.mesh, s.R, s.speed, s.tilt, s.phase, t);
+      if (s.mesh.userData.engine) {
+        s.mesh.userData.engine.material.opacity = 0.65 + Math.sin(t * 7 + s.phase) * 0.2;
+      }
     });
 
-    floaters.forEach((f, i) => {
-      f.rotation.x += 0.008 + i * 0.003;
-      f.rotation.y += 0.006 + i * 0.002;
-      f.position.y += Math.sin(clock + i * 1.2) * 0.008;
-    });
-
-    camera.position.x += (target.x * 2 - camera.position.x) * 0.04;
-    camera.position.y += (target.y * 1.5 - camera.position.y) * 0.04;
+    // Camera parallax
+    camera.position.x += (mSmooth.x * 2   - camera.position.x) * 0.04;
+    camera.position.y += (mSmooth.y * 1.5  - camera.position.y) * 0.04;
 
     renderer.render(scene, camera);
   }
-
   animate();
 })();
 
@@ -134,55 +193,41 @@ function updateActiveNav() {
   const sections = document.querySelectorAll('section[id]');
   const scrollY = window.scrollY + window.innerHeight * 0.35;
   sections.forEach(sec => {
-    const top = sec.offsetTop;
-    const h = sec.offsetHeight;
     const link = document.querySelector(`.nav-links a[href="#${sec.id}"]`);
-    if (link) link.classList.toggle('active', scrollY >= top && scrollY < top + h);
+    if (link) link.classList.toggle('active', scrollY >= sec.offsetTop && scrollY < sec.offsetTop + sec.offsetHeight);
   });
 }
 
-/* ── SMOOTH NAV CLOSE ON LINK CLICK ───────────────────────────────── */
 document.querySelectorAll('.nav-links a').forEach(a => {
   a.addEventListener('click', () => navLinks.classList.remove('open'));
 });
 
 /* ── REVEAL ON SCROLL ──────────────────────────────────────────────── */
-const reveals = document.querySelectorAll('.reveal');
-
 const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach((entry, i) => {
+  entries.forEach(entry => {
     if (entry.isIntersecting) {
       const el = entry.target;
-      const delay = el.dataset.delay || 0;
-      setTimeout(() => el.classList.add('visible'), delay);
+      setTimeout(() => el.classList.add('visible'), el.dataset.delay || 0);
       revealObserver.unobserve(el);
     }
   });
 }, { threshold: 0.12 });
 
-reveals.forEach((el, i) => {
+document.querySelectorAll('.reveal').forEach((el, i) => {
   el.dataset.delay = (i % 5) * 80;
   revealObserver.observe(el);
 });
 
 /* ── 3D TILT ON CARDS ──────────────────────────────────────────────── */
 document.querySelectorAll('.tilt-card').forEach(card => {
-  const INTENSITY = 12;
   let rect;
-
-  card.addEventListener('mouseenter', () => {
-    rect = card.getBoundingClientRect();
-  });
-
+  card.addEventListener('mouseenter', () => { rect = card.getBoundingClientRect(); });
   card.addEventListener('mousemove', e => {
     if (!rect) rect = card.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dx = (e.clientX - cx) / (rect.width / 2);
-    const dy = (e.clientY - cy) / (rect.height / 2);
-    card.style.transform = `perspective(900px) rotateY(${dx * INTENSITY}deg) rotateX(${-dy * INTENSITY}deg) scale3d(1.02,1.02,1.02)`;
+    const dx = (e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2);
+    const dy = (e.clientY - rect.top  - rect.height / 2) / (rect.height / 2);
+    card.style.transform = `perspective(900px) rotateY(${dx * 12}deg) rotateX(${-dy * 12}deg) scale3d(1.02,1.02,1.02)`;
   });
-
   card.addEventListener('mouseleave', () => {
     card.style.transform = 'perspective(900px) rotateY(0deg) rotateX(0deg) scale3d(1,1,1)';
     card.style.transition = 'transform 0.5s ease';
@@ -190,13 +235,13 @@ document.querySelectorAll('.tilt-card').forEach(card => {
   });
 });
 
-/* ── ABOUT CARD MOUSE TILT ─────────────────────────────────────────── */
+/* ── ABOUT CARD TILT ───────────────────────────────────────────────── */
 const aboutCard = document.getElementById('about-card');
 if (aboutCard) {
   const wrap = aboutCard.parentElement;
   wrap.addEventListener('mousemove', e => {
     const r = wrap.getBoundingClientRect();
-    const dx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+    const dx = ((e.clientX - r.left) / r.width  - 0.5) * 2;
     const dy = ((e.clientY - r.top)  / r.height - 0.5) * 2;
     aboutCard.style.transform = `perspective(900px) rotateY(${dx * 14}deg) rotateX(${-dy * 10}deg)`;
   });
